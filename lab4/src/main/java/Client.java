@@ -74,18 +74,17 @@ class Client extends AbstractVerticle {
     }
     public static void main(String[] args) {
         JFileChooser jFileChooser = new JFileChooser();
+        final Vertx vertx = Vertx.vertx();
+
         jFileChooser.setCurrentDirectory(new File("C:\\Users\\Михаил\\IdeaProjects\\lab4\\clientfiles\\"));
         int result = jFileChooser.showOpenDialog(new JFrame());
         if (result == JFileChooser.APPROVE_OPTION) {
             File selectedFile = jFileChooser.getSelectedFile();
-            Vertx.clusteredVertx(new VertxOptions(),(event ->
-                    event.result().deployVerticle(new Client(selectedFile.getName() ,selectedFile.getAbsolutePath()))));
+            vertx.deployVerticle(new Client(selectedFile.getName() ,selectedFile.getAbsolutePath()));
         }
         else{
             System.exit(0);
         }
-
-
     }
 }
 
