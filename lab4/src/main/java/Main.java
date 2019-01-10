@@ -31,15 +31,17 @@ public class Main extends AbstractVerticle {
                 String lifi  = getFileContent(fil);
 
                 String filename = req.getHeader("content-name");
+
                 String chk = req.getHeader("content-checksum")+ " ";
-                String in = "" + req.hashCode();
                 boolean isFound = lifi.indexOf(chk) !=-1? true: false;
                 if(!isFound) {
+                    if(new File("C:\\Users\\Михаил\\IdeaProjects\\lab4\\serverfiles\\" + filename).exists()){
+                        filename = "1_" + filename ;
+                    }
                     vertx.fileSystem().open("C:\\Users\\Михаил\\IdeaProjects\\lab4\\serverfiles\\" + filename, new OpenOptions(), ares -> {
                         AsyncFile file = ares.result();
                         Pump pump = Pump.pump(req, file);
                         req.endHandler(v1 -> file.close(v2 -> {
-                            System.out.println("Uploaded to " + filename);
                             req.response().end();
                         }));
                         pump.start();
@@ -52,6 +54,9 @@ public class Main extends AbstractVerticle {
                 }
                 else{
                     System.out.println("Error that file already here!");
+                    req.response().setStatusCode(500);
+                    req.response().end();
+
                 }
             }catch (IOException e ){
                 System.out.println(e.getCause());
