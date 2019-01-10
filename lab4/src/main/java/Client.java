@@ -4,6 +4,7 @@ import io.vertx.core.VertxOptions;
 import java.io.*;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import io.vertx.core.file.FileProps;
 import io.vertx.core.file.FileSystem;
 import io.vertx.core.file.AsyncFile;
 import io.vertx.core.file.OpenOptions;
@@ -22,8 +23,7 @@ class Client extends AbstractVerticle {
          this.Path = path;
      }
 
-    private static String getFileChecksum(MessageDigest digest, File file) throws IOException
-    {
+    private static String getFileChecksum(MessageDigest digest, File file) throws IOException {
         FileInputStream fis = new FileInputStream(file);
         byte[] byteArray = new byte[1024];
         int bytesCount = 0;
@@ -50,10 +50,12 @@ class Client extends AbstractVerticle {
             MessageDigest md5Digest = MessageDigest.getInstance("MD5");
             String checksum = getFileChecksum(md5Digest, filechecksum);
             FileSystem fs = vertx.fileSystem();
-
+            fs.props(Path, ares -> {
+                FileProps props = ares.result();
+                long size = props.size();
                 req.headers().set("content-name", "" + filename);
                 req.headers().set("content-checksum", "" + checksum);
-
+                req.headers().set("content-length", "" + size);
                 fs.open(Path, new OpenOptions(), ares2 -> {
                     AsyncFile file = ares2.result();
                     Pump pump = Pump.pump(file, req);
@@ -63,6 +65,7 @@ class Client extends AbstractVerticle {
                     pump.start();
                 });
 
+            });
             }
         catch (NoSuchAlgorithmException e){
             System.out.println(e.getCause());
