@@ -12,59 +12,63 @@ import java.util.List;
 
 
 public class Main extends AbstractVerticle {
-
+    String lifi = "";
+    String chk = "";
+    public Main(String lifi){
+        this.lifi = lifi;
+    }
     @Override
     public void start()  {
 
         vertx.createHttpServer().requestHandler(req -> {
-
             req.pause();
-
-                Path path = Paths.get("C:\\Users\\Михаил\\IdeaProjects\\lab4\\serverfiles\\checksumoffiles.txt");
-
-                try {
-                    String lifi = "";
-                    List<String> tmp = Files.readAllLines(path);
-                    for (String s : tmp)
-                    {
-                        lifi += s + " ";
-                    }
-                    String filename = req.getHeader("content-name");
-                    String chk = req.getHeader("content-checksum") + " ";
-                    boolean isFound = lifi.indexOf(chk) != -1 ? true : false;
-                    if (!isFound) {
-                        while (new File("C:\\Users\\Михаил\\IdeaProjects\\lab4\\serverfiles\\" + filename).exists()) {
-                            filename = "new_" + filename;
-                        }
-                        vertx.fileSystem().open("C:\\Users\\Михаил\\IdeaProjects\\lab4\\serverfiles\\" + filename, new OpenOptions(), ares -> {
-                            AsyncFile file = ares.result();
-                            Pump pump = Pump.pump(req, file);
-                            req.endHandler(v1 -> file.close(v2 -> {
-                                req.response().end();
-                            }));
-                            pump.start();
-                            req.resume();
-
-                        });
-                        Path os = Paths.get("C:\\Users\\Михаил\\IdeaProjects\\lab4\\serverfiles\\checksumoffiles.txt");
-                        Files.write(os, chk.getBytes(), StandardOpenOption.APPEND);
-
-                    } else {
-                        System.out.println("Error that file already here!");
-                        req.response().setStatusCode(500);
+            String filename = req.getHeader("content-name");
+            chk = req.getHeader("content-checksum") + " ";
+            boolean isFound = lifi.indexOf(chk) != -1 ? true : false;
+            if (!isFound) {
+                while (new File("C:\\Users\\Михаил\\IdeaProjects\\lab4\\serverfiles\\" + filename).exists()) {
+                    filename = "new_" + filename;
+                }
+                vertx.fileSystem().open("C:\\Users\\Михаил\\IdeaProjects\\lab4\\serverfiles\\" + filename, new OpenOptions(), ares -> {
+                    AsyncFile file = ares.result();
+                    Pump pump = Pump.pump(req, file);
+                    req.endHandler(v1 -> file.close(v2 -> {
                         req.response().end();
+                    }));
+                    pump.start();
+                    req.resume();
+                });
 
-                    }
-                }  catch (IOException ex) {
+            } else {
+                System.out.println("Error that file already here!");
+                req.response().setStatusCode(500);
+                req.response().end();
+
+            }
+            try {
+                Path os = Paths.get("C:\\Users\\Михаил\\IdeaProjects\\lab4\\serverfiles\\checksumoffiles.txt");
+                Files.write(os, chk.getBytes(), StandardOpenOption.APPEND);
+            }  catch (IOException ex) {
                 ex.printStackTrace();
             }
         }).listen(8080);
 
     }
     public static void main(String[] args) {
+        Path path = Paths.get("C:\\Users\\Михаил\\IdeaProjects\\lab4\\serverfiles\\checksumoffiles.txt");
+        String lifi = "";
+        try {
+            List<String> tmp = Files.readAllLines(path);
+            for (String s : tmp)
+            {
+                lifi += s + " ";
+            }
+        }  catch (IOException ex) {
+            ex.printStackTrace();
+        }
+
         final Vertx vertx = Vertx.vertx();
-        vertx.deployVerticle(new Main());
+        vertx.deployVerticle(new Main(lifi));
     }
 }
-
 
