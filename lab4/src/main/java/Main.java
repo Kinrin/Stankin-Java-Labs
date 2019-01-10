@@ -35,7 +35,7 @@ public class Main extends AbstractVerticle {
                 String chk = req.getHeader("content-checksum")+ " ";
                 boolean isFound = lifi.indexOf(chk) !=-1? true: false;
                 if(!isFound) {
-                     while (new File("C:\\Users\\Михаил\\IdeaProjects\\lab4\\serverfiles\\" + filename).exists()){
+                    while (new File("C:\\Users\\Михаил\\IdeaProjects\\lab4\\serverfiles\\" + filename).exists()){
                         filename = "new_" + filename ;
                     }
                     vertx.fileSystem().open("C:\\Users\\Михаил\\IdeaProjects\\lab4\\serverfiles\\" + filename, new OpenOptions(), ares -> {
@@ -65,8 +65,11 @@ public class Main extends AbstractVerticle {
 
     }
     public static void main(String[] args) {
-        Vertx.clusteredVertx(new VertxOptions(), event -> event.result().deployVerticle(new Main()));
+        final Vertx vertx = Vertx.vertx();
+        vertx.deployVerticle(new Main());
     }
 }
+
+
 
 
