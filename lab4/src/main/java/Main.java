@@ -35,8 +35,8 @@ public class Main extends AbstractVerticle {
                 String chk = req.getHeader("content-checksum")+ " ";
                 boolean isFound = lifi.indexOf(chk) !=-1? true: false;
                 if(!isFound) {
-                    if(new File("C:\\Users\\Михаил\\IdeaProjects\\lab4\\serverfiles\\" + filename).exists()){
-                        filename = "1_" + filename ;
+                     while (new File("C:\\Users\\Михаил\\IdeaProjects\\lab4\\serverfiles\\" + filename).exists()){
+                        filename = "new_" + filename ;
                     }
                     vertx.fileSystem().open("C:\\Users\\Михаил\\IdeaProjects\\lab4\\serverfiles\\" + filename, new OpenOptions(), ares -> {
                         AsyncFile file = ares.result();
